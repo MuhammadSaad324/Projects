@@ -1,81 +1,108 @@
 from tkinter import *
+import math
+PINK = "#ffc0cb"
+RED = "#ff0000"
+YELLOW = "#ffff00"
+GREEN = "#008000"
+WORK_MIN = 25
+SHORT_BREAK_MIN = 5
+LONG_BREAK_MIN = 20
+FONT = "Courier"
+reps = 0
+my_timer  = None
 
-from names_data import *
-import random
+
+# Reset Functionality
+def reset_timer():
+    windows.after_cancel(my_timer)
+    if reset_timer:
+        my_label.config(text="Timer")
+        canvas.itemconfig(timer_text, text="00:00")
+        check_mark_label.config(text="")
+        global reps
+        reps = 0
+
+# Windows Screen
 windows = Tk()
-windows.title("My First GUI")
-windows.minsize(600,600)
-
-# Let's Create a Label
-my_label = Label(text= "I Am A Label.",font = ("Noto Serif",30))
-my_label.config(text = "AlphaGo")
-my_label.grid(column = 0 , row = 0)
+windows.title("Pomodoro App")
+windows.config(padx=100,pady=50,bg=PINK)
 
 
-# Let's create a text input and add eventListener
-def click_button () :
-    my_label ["text"] = my_entry.get()
-    print("Hello World!")
-my_button = Button(text = "Click Me",font = "Arial",command = click_button)
-my_button.grid(column= 2 , row= 2)
 
-# Let's Create EntryWay
-my_entry = Entry(width = 40)
-my_entry.grid(row= 3 , column= 4)
 
-# New Button
-new_button = Button(text = "New Button",font = "Arial")
-new_button.grid(row= 0 , column = 2)
-# # Text
-# my_text = Text()
-# my_text.focus()
-# my_text.insert(END, "Example of multi-line text entry.")
-# print(my_text.get("1.0", END))
-# my_text.pack()
-#
-# # Spinbox
-# def spin_box_used () :
-#     print(my_spin_boxes.get())
-# my_spin_boxes = Spinbox(from_= 0 , to = 20 , command = spin_box_used)
-# my_spin_boxes.pack()
-#
-# # Scale
-# def scale_used (value):
-#     print(value)
-# scale = Scale(from_= 0, to = 100 , command=scale_used)
-# scale.pack()
-#
-# #Checkbutton
-# def checkbutton_used():
-#     #Prints 1 if On button checked, otherwise 0.
-#     print(checked_state.get())
-# #variable to hold on to checked state, 0 is off, 1 is on.
-# checked_state = IntVar()
-# checkbutton = Checkbutton(text="Is On?", variable=checked_state, command=checkbutton_used)
-# checked_state.get()
-# checkbutton.pack()
-#
-# #Radiobutton
-# def radio_used():
-#     print(radio_state.get())
-# #Variable to hold on to which radio button value is checked.
-# radio_state = IntVar()
-# radiobutton1 = Radiobutton(text="Option1", value=1, variable=radio_state, command=radio_used)
-# radiobutton2 = Radiobutton(text="Option2", value=2, variable=radio_state, command=radio_used)
-# radiobutton1.pack()
-# radiobutton2.pack()
-#
-#
-# #Listbox
-# def listbox_used(event):
-#     # Gets current selection from listbox
-#     print(listbox.get(listbox.curselection()))
-#
-# listbox = Listbox(height=4)
-# fruits = ["Apple", "Pear", "Orange", "Banana"]
-# for item in fruits:
-#     listbox.insert(fruits.index(item), item)
-# listbox.bind("<<ListboxSelect>>", listbox_used)
-# listbox.pack()
+
+def timer():
+    global reps
+    reps += 1
+
+    work_sec = WORK_MIN * 60
+    short_break_sec = SHORT_BREAK_MIN * 60
+    long_break_sec = LONG_BREAK_MIN * 60
+
+    if reps % 8 == 0:
+        count_down(long_break_sec)
+        my_label.config(text="Break" , fg=YELLOW)
+    elif reps % 2 == 0:
+        count_down(short_break_sec)
+        my_label.config(text="Break",fg=RED)
+    else:
+        count_down(work_sec)
+        my_label.config(text = "Work" , fg=GREEN)
+
+
+
+def count_down(count):
+    minute_counter = math.floor(count / 60)
+    seconds_counter = count % 60
+
+    if seconds_counter < 10:
+        seconds_counter = f"0{seconds_counter}"
+
+    canvas.itemconfig(timer_text, text =f"{minute_counter}:{seconds_counter}")
+    if count > 0:
+        global my_timer
+        my_timer = windows.after(1000,count_down,count-1)
+    else:
+        timer()
+        marks = ""
+        work_sessions = math.floor(reps/2)
+        for _ in range(work_sessions):
+            marks+="✔"
+        check_mark_label.config(text=marks)
+
+
+my_label = Label(text="Timer",font = (FONT,30,"bold"),fg=GREEN,highlightthickness=0 , bg=PINK)
+my_label.grid(row=1,column=2)
+
+# Let's Deploy Image On Screen Using Canvas Widget
+canvas = Canvas(width=200,height=224,bg=PINK,highlightthickness=0)
+my_image = PhotoImage(file="tomato.png")
+canvas.create_image(100,115,image = my_image)
+timer_text = canvas.create_text(101,140,text="00:00",font=(FONT,30,"bold"),fill="white")
+canvas.grid(row=2,column=2)
+
+# Create Start Button
+start_button = Button(text="Start",font=(FONT,10,"bold"),command=timer)
+start_button.grid(row=3,column=1)
+
+# Create Reset Button
+reset_button = Button(text="Reset",font=(FONT,10,"bold"),command=reset_timer)
+reset_button.grid(row=3,column=3)
+
+# Let's Create Check Mark
+check_mark_label = Label(text="✔",fg=GREEN,font=(FONT,10))
+check_mark_label.grid(row=4, column=2)
+
+
+
+
+
+
+
+
+
+
+
+
 
 windows.mainloop()
